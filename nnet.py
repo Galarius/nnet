@@ -1,13 +1,36 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
+import os
 import numpy as np
+from pylab import plt
+
+def plot_map(xs, ys):
+    plt.plot(xs, ys)
+    plt.grid(True)
+    plt.show()
+
+# T0 = np.array((
+# [0, 6], [1, 5], [2, 4], [3, 3], [4,2], [5,1], [6,0], 
+
+# ), dtype=float) 
 
 # input
-X = np.array(([2, 9], [1, 5], [3, 6]), dtype=float)
+X = np.array((
+# For I trajectory
+[1, 5], [2, 5], [6, 1], [4, 4], [5,3], [10,4], [13,4], 
+[14,2], [10,5], [8, 5], [5, 2], [9,2], [1, 3], [2, 3], 
+[3, 3], [11,4], [11,2], [14,4], [7,3], [7, 1], 
+# For II trajectory
+[1, 7], [1, 6], [2, 6], [2,8], [3,7], [4, 6], [4,10], 
+[5, 7], [6, 5], [7, 7], [8,6], [9,9], [10,7], [10,9], 
+[12,6], [13,5], [13,7], [14,5], [7,5], [11,5]
+), dtype=float)
 xPredicted = np.array(([4, 8]), dtype=float)
 # output
-y = np.array(([92], [86], [89]), dtype=float)
+y = np.array((
+    [0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],
+    [1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1]), dtype=float)
 
 X = X / np.amax(X, axis=0)
 xPredicted = xPredicted / np.amax(xPredicted, axis=0)
@@ -57,23 +80,25 @@ class Neural_Network(object):
     def saveWeights(self):
         np.savetxt("w1.txt", self.W1, fmt="%s")
         np.savetxt("w2.txt", self.W2, fmt="%s")
+    
+    def loadWeights(self):
+        self.W1 = np.loadtxt("w1.txt", dtype=float)
+        self.W2 = np.loadtxt("w2.txt", dtype=float)
 
-# Untrained
-# NN = Neural_Network()
-# o = NN.forward(X)
-# print "Predicted Output: \n" + str(o)
-# print "Actual Output: \n" + str(y)
-# Trained
 NN = Neural_Network()
-for i in xrange(1000):
-    print "Input: \n" + str(X)
-    print "Actual Output: \n" + str(y)
-    print "Predicted Output: \n" + str(NN.forward(X))
-    print "Loss: \n" + str(np.mean(np.square(y - NN.forward(X))))
-    print "\n"
-    NN.train(X, y)
+if not os.path.exists("w1.txt") or \
+   not os.path.exists("w2.txt"):
+    for i in xrange(1000):
+        print "Input: \n" + str(X)
+        print "Actual Output: \n" + str(y)
+        print "Predicted Output: \n" + str(NN.forward(X))
+        print "Loss: \n" + str(np.mean(np.square(y - NN.forward(X))))
+        print "\n"
+        NN.train(X, y)
+    NN.saveWeights()
+else:
+    NN.loadWeights()
 
-# NN.saveWeights()
 print "Predicted data based on trained weights: "
 print "Input (scaled): \n" + str(X)
-print "Output: \n" + str(NN.predict(X))
+print "Output: \n" + str(NN.predict(xPredicted))
