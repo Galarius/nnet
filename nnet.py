@@ -3,34 +3,26 @@
 
 import os
 import numpy as np
+from map import Map
+
+map = Map(15, 10)
+(d0, d1) = map.build(20)
 
 # input
-X = np.array((
-# For I trajectory
-[1, 5], [2, 5], [6, 1], [4, 4], [5,3], [10,4], [13,4], 
-[14,2], [10,5], [8, 5], [5, 2], [9,2], [1, 3], [2, 3], 
-[3, 3], [11,4], [11,2], [14,4], [7,3], [7, 1], 
-# For II trajectory
-[1, 7], [1, 6], [2, 6], [2,8], [3,7], [4, 6], [4,10], 
-[5, 7], [6, 5], [7, 7], [8,6], [9,9], [10,7], [10,9], 
-[12,6], [13,5], [13,7], [14,5], [7,5], [11,5]
-), dtype=float)
+X = np.concatenate((d0, d1), axis=0)
 
 # output
-y = np.array((
-    [0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],    # trajectory I
-    [1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1]),   # trajectory II
-    dtype=float)
-
-# input for prediction
-xPredicted = np.array(([4, 8]), dtype=float)
+yd0 = np.array([[0]] * d0.shape[0], dtype=float)
+yd1 = np.array([[1]] * d1.shape[0], dtype=float)
+y = np.concatenate((yd0, yd1), axis=0)
 
 # normalization
 X = X / np.amax(X, axis=0)
-xPredicted = xPredicted / np.amax(xPredicted, axis=0)
-y = y / 100
+# y = y / 100
 
-np.random.seed(1)
+# input for prediction
+xPredicted = np.array(([4, 8]), dtype=float)
+xPredicted = xPredicted / np.amax(xPredicted, axis=0)
 
 class Neural_Network(object):
     def __init__(self):

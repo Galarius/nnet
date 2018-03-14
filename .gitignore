@@ -3,5 +3,7 @@
 *.pdf
 *.gz
 *.toc
+*.pyc
+map.png
 w1.txt
 w2.txt
