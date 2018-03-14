@@ -3,17 +3,6 @@
 
 import os
 import numpy as np
-from pylab import plt
-
-def plot_map(xs, ys):
-    plt.plot(xs, ys)
-    plt.grid(True)
-    plt.show()
-
-# T0 = np.array((
-# [0, 6], [1, 5], [2, 4], [3, 3], [4,2], [5,1], [6,0], 
-
-# ), dtype=float) 
 
 # input
 X = np.array((
@@ -26,12 +15,17 @@ X = np.array((
 [5, 7], [6, 5], [7, 7], [8,6], [9,9], [10,7], [10,9], 
 [12,6], [13,5], [13,7], [14,5], [7,5], [11,5]
 ), dtype=float)
-xPredicted = np.array(([4, 8]), dtype=float)
+
 # output
 y = np.array((
-    [0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],
-    [1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1]), dtype=float)
+    [0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],    # trajectory I
+    [1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1]),   # trajectory II
+    dtype=float)
 
+# input for prediction
+xPredicted = np.array(([4, 8]), dtype=float)
+
+# normalization
 X = X / np.amax(X, axis=0)
 xPredicted = xPredicted / np.amax(xPredicted, axis=0)
 y = y / 100
