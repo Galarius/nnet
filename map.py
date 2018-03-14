@@ -5,10 +5,31 @@ import sys
 import numpy as np
 from pylab import plt
 
+def triangleArea(p0, p1, p2):
+    return 0.5 * (-p1[1] * p2[0] + p0[1] * (-p1[0] + p2[0]) + p0[0] * (p1[1] - p2[1]) + p1[0] * p2[1])
+
+# Barycentric Coordinates
+def insideTriangle(p, p0, p1, p2, area):
+    s = 1.0 / (2.0 * area) * (p0[1] * p2[0] - p0[0] * p2[1] + (p2[1] - p0[1]) * p[0] + (p0[0] - p2[0]) * p[1])
+    t = 1.0 / (2.0 * area) * (p0[0] * p1[1] - p0[1] * p1[0] + (p0[1] - p1[1]) * p[0] + (p1[0] - p0[0]) * p[1])
+    return s > 0 and t > 0 and 1-s-t > 0
+
 class Map(object):
     def __init__(self, width, height):
         self.width = width
         self.height = height
+        # старт
+        self.o1 = [0, np.random.randint(self.height-2) + 1]
+        # промежуточная точка маршрута 1
+        self.a = [np.random.randint(self.width-4) + 2, 0]
+        # промежуточная точка маршрута 2
+        self.b = [np.random.randint(self.width-4) + 2, self.height-1]
+        # цель
+        self.o2 = [self.width-1, np.random.randint(self.height-2)+1]
+        # площадь треугольника соответствующего 1ой траектории
+        self.area0 = triangleArea(self.o1, self.a, self.o2)
+        # площадь треугольника соответствующего 2ой траектории
+        self.area2 = triangleArea(self.o1, self.b, self.o2)
 
     def _route(self, o1, o2, endpoint = False):
         d = o1[0] - o2[0]
@@ -43,10 +64,8 @@ class Map(object):
         else:
             p1 = v1 = np.array(self.b, dtype=float)
             p2 = v2 = np.array(self.o2, dtype=float)
-        
-        # for barycentric coordinates
-        area = 0.5 * (-p1[1]*p2[0] + p0[1] * (-p1[0] + p2[0]) + p0[0] * (p1[1] - p2[1]) + p1[0] * p2[1])
-
+            
+        area = triangleArea(p0,p1,p2)
         v1 = v1 - v0
         v2 = v2 - v0
         if uniform:
@@ -56,9 +75,7 @@ class Map(object):
             a2 = np.random.random()
             if uniform:
                 x = a1 * v1 + a2 * v2 + v0
-                s = 1.0 / (2.0 * area) * (p0[1] * p2[0] - p0[0] * p2[1] + (p2[1] - p0[1]) * x[0] + (p0[0] - p2[0]) * x[1])
-                t = 1.0 / (2.0 * area) * (p0[0] * p1[1] - p0[1] * p1[0] + (p0[1] - p1[1]) * x[0] + (p1[0] - p0[0]) * x[1])
-                if s > 0 and t > 0 and 1-s-t > 0:
+                if insideTriangle(x,p0,p1,p2,area):
                     data.append(x)
             else:
                 x = a1 * v1 + (1 - a1) * a2 * v2 + v0
@@ -67,14 +84,6 @@ class Map(object):
         
 
     def build(self, dsize):
-        # старт
-        self.o1 = [0, np.random.randint(self.height-2) + 1]
-        # промежуточная точка маршрута 1
-        self.a = [np.random.randint(self.width-4) + 2, 0]
-        # промежуточная точка маршрута 2
-        self.b = [np.random.randint(self.width-4) + 2, self.height-1]
-        # цель
-        self.o2 = [self.width-1, np.random.randint(self.height-2)+1]
         # генерация траектории o-a-c
         self.t0  = np.array(self._generate(self.o1, self.a, self.o2), dtype=float)
         # генерация траектории o-b-c

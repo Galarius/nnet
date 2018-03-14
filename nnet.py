@@ -49,3 +49,5 @@ class NeuralNetwork(object):
     def loadWeights(self):
         self.W1 = np.loadtxt("w1.txt", dtype=float)
         self.W2 = np.loadtxt("w2.txt", dtype=float)
+        self.W2 = self.W2.reshape(self.W2.shape[0], 1)
+        
