@@ -4,14 +4,17 @@
 import numpy as np
 
 class NeuralNetwork(object):
-    def __init__(self):
-        self.inputSize = 2
-        self.outputSize = 1
-        self.hiddenSize = 3
+    def __init__(self, ni, no):
+        self.inputSize = ni
+        self.outputSize = no
+        self.hiddenSize = ni + 1 # смещение
         self.W1 = np.random.randn(self.inputSize, self.hiddenSize)
         self.W2 = np.random.randn(self.hiddenSize, self.outputSize)
     
     def forward(self, X):
+        """
+        Прямое распространение
+        """
         self.z = np.dot(X, self.W1)
         self.z2 = self.sigmoid(self.z)
         self.z3 = np.dot(self.z2, self.W2)
@@ -19,6 +22,9 @@ class NeuralNetwork(object):
         return o
 
     def backward(self, X, y, o):
+        """
+        Обратное распространение
+        """
         self.o_error = y - o
         self.o_delta = self.o_error * self.sigmoidPrime(o)
 

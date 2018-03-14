@@ -32,7 +32,7 @@ def help(name):
 def main(argv):    
     opt_train = False
     opt_log = False
-    N = 1000
+    N = 500
 
     for arg in argv:
         if arg == '-h':
@@ -50,7 +50,7 @@ def main(argv):
     map = Map(15, 10)
     X, y = train_data(map)
 
-    NN = NeuralNetwork()
+    NN = NeuralNetwork(2, 1)
     if  opt_train or \
         not os.path.exists("w1.txt") or \
         not os.path.exists("w2.txt"):
@@ -59,9 +59,9 @@ def main(argv):
             with open('training.log', 'w') as f:
                 for epoch in xrange(N):
                     f.write('Epoch {}\n'.format(epoch))
-                    f.write("Input:\n{}\n".format(X))
-                    f.write("Actual Output:\n{}\n".format(y))
-                    f.write("Predicted Output:\n{}\n".format(np.round(NN.forward(X))))
+                    f.write("Input:\n{}\n".format(X.T))
+                    f.write("Actual Output:\n{}\n".format(y.T))
+                    f.write("Predicted Output:\n{}\n".format(np.round(NN.forward(X).T)))
                     f.write("Loss:\n{}\n\n".format(str(np.mean(np.square(y - NN.forward(X))))))
                     NN.train(X, y)
         else:
