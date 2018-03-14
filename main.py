@@ -27,14 +27,12 @@ def train_data(map):
     return (X, y)
 
 def help(name):
-    print "{} [-t,-h]".format(name)
+    print "{} [-h,-t,-l]".format(name)
 
-def main(argv):
-    # if not len(argv):
-    #     help(sys.argv[0])
-    #     sys.exit(1)
-    
+def main(argv):    
     opt_train = False
+    opt_log = False
+    N = 1000
 
     for arg in argv:
         if arg == '-h':
@@ -42,6 +40,8 @@ def main(argv):
             sys.exit(0)
         elif arg == '-t':
             opt_train = True
+        elif arg == '-l':
+            opt_log = True
         else:
             print 'Unrecognized option {}'.format(arg)
             help(sys.argv[0])
@@ -55,14 +55,18 @@ def main(argv):
         not os.path.exists("w1.txt") or \
         not os.path.exists("w2.txt"):
         print 'Training...'
-        for i in xrange(1000):
-            #print "Input: \n" + str(X)
-            #print "Actual Output: \n" + str(y)
-            #print "Predicted Output: \n" 
-            #print np.round(NN.forward(X))
-            #print "Loss: \n" + str(np.mean(np.square(y - NN.forward(X))))
-            #print "\n"
-            NN.train(X, y)
+        if opt_log:
+            with open('training.log', 'w') as f:
+                for epoch in xrange(N):
+                    f.write('Epoch {}\n'.format(epoch))
+                    f.write("Input:\n{}\n".format(X))
+                    f.write("Actual Output:\n{}\n".format(y))
+                    f.write("Predicted Output:\n{}\n".format(np.round(NN.forward(X))))
+                    f.write("Loss:\n{}\n\n".format(str(np.mean(np.square(y - NN.forward(X))))))
+                    NN.train(X, y)
+        else:
+            for epoch in xrange(N):
+                NN.train(X, y)
         NN.saveWeights()
         print 'Done.'
     else:
