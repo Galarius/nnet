@@ -10,20 +10,6 @@ class Map(object):
         self.width = width
         self.height = height
 
-        # старт
-        self.o1 = [0, np.random.randint(self.height-2) + 1]
-        # промежуточная точка маршрута 1
-        self.a = [np.random.randint(self.width-4) + 2, 0]
-        # промежуточная точка маршрута 2
-        self.b = [np.random.randint(self.width-4) + 2, self.height-1]
-        # цель
-        self.o2 = [self.width-1, np.random.randint(self.height-2)+1]
-
-        # генерация траектории o-a-c
-        self.t0  = np.array(self._generate(self.o1, self.a, self.o2), dtype=float)
-        # генерация траектории o-b-c
-        self.t1  = np.array(self._generate(self.o1, self.b, self.o2), dtype=float)
-
     def _route(self, o1, o2, endpoint = False):
         # print "Generating trajectory from {} to {}...".format(o1, o2)
         d = o1[0] - o2[0]
@@ -82,18 +68,32 @@ class Map(object):
         
 
     def build(self, dsize):
-        dataset0 = self.dataset(0, dsize)
-        dataset1 = self.dataset(1, dsize)
-
+        # старт
+        self.o1 = [0, np.random.randint(self.height-2) + 1]
+        # промежуточная точка маршрута 1
+        self.a = [np.random.randint(self.width-4) + 2, 0]
+        # промежуточная точка маршрута 2
+        self.b = [np.random.randint(self.width-4) + 2, self.height-1]
+        # цель
+        self.o2 = [self.width-1, np.random.randint(self.height-2)+1]
+        # генерация траектории o-a-c
+        self.t0  = np.array(self._generate(self.o1, self.a, self.o2), dtype=float)
+        # генерация траектории o-b-c
+        self.t1  = np.array(self._generate(self.o1, self.b, self.o2), dtype=float)
+        self.dataset0 = self.dataset(0, dsize)
+        self.dataset1 = self.dataset(1, dsize)
+        return (self.dataset0, self.dataset1)
+    
+    def plot(self, predict, save=False):
         fig, ax = plt.subplots()
         ax.plot(self.t0[:,0], self.t0[:,1], 'r', label='Trajectory 0')
         ax.plot(self.t1[:,0], self.t1[:,1], 'b', label='Trajectory 1')
-        # ax.plot([self.o1[0], self.o2[0]], [self.o1[1], self.o2[1]], 'g-')
-        ax.plot(dataset0[:,0], dataset0[:,1], 'ro', label='Train Dataset 0')
-        ax.plot(dataset1[:,0], dataset1[:,1], 'bo', label='Train Dataset 1')
-        legend = ax.legend(loc='best', shadow=True)
+        ax.plot(self.dataset0[:,0], self.dataset0[:,1], 'ro', label='Train Dataset 0')
+        ax.plot(self.dataset1[:,0], self.dataset1[:,1], 'bo', label='Train Dataset 1')
+        ax.plot(predict[:,0], predict[:,1], 'go', markersize=10, label='Dataset to Predict')
+        legend = ax.legend(loc='best', framealpha=0.5)
         plt.title("Map")
         plt.grid(True)
-        plt.savefig('map.png')
+        if save:
+            plt.savefig('map.png')
         plt.show()
-        return (dataset0, dataset1)
