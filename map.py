@@ -11,7 +11,6 @@ class Map(object):
         self.height = height
 
     def _route(self, o1, o2, endpoint = False):
-        # print "Generating trajectory from {} to {}...".format(o1, o2)
         d = o1[0] - o2[0]
         if not d:
             print "Invalid input"
