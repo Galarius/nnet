@@ -100,10 +100,9 @@ def main(argv):
     if (res == z_check).all():
         print "\nAll Good!"
     else:
-        print "Correct:"
-        print res == z_check
+        print "{}% are good!".format((res == z_check).sum() * 100 / len(res))
 
-    map.plotTrajectories('report/1_trajectories.png')
+    #map.plotMap('report/1_trajectories.png')
     map.plot(z, 'map.png')
 
 if __name__ == "__main__":

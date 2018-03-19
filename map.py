@@ -61,7 +61,7 @@ class Map(object):
         self.dataset1 = self.dataset(1, dsize)
         return (self.dataset0, self.dataset1)
 
-    def plotTrajectories(self, fname=None):
+    def plotMap(self, fname=None):
         fig, ax = plt.subplots()
         ax.plot(self.t0[:,0], self.t0[:,1], 'r', label='Trajectory 0')
         ax.plot(self.t1[:,0], self.t1[:,1], 'b', label='Trajectory 1')
