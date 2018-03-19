@@ -27,17 +27,20 @@ def train_data(map):
     return (X, y)
 
 def help(name):
-    print "{} [-h,-t,-l]".format(name)
+    print "{} [-h,-s,-t,-l]".format(name)
 
 def main(argv):    
     opt_train = False
     opt_log = False
+    opt_seed = False
     N = 500
 
     for arg in argv:
         if arg == '-h':
             help(sys.argv[0])
             sys.exit(0)
+        elif arg == '-s':
+            opt_seed = True
         elif arg == '-t':
             opt_train = True
         elif arg == '-l':
@@ -47,7 +50,9 @@ def main(argv):
             help(sys.argv[0])
             sys.exit(2)
 
-    map = Map(15, 10)
+    if opt_seed:
+        np.random.seed(1)
+    map = Map(20, 20)
     X, y = train_data(map)
 
     NN = NeuralNetwork(2, 1)
@@ -73,6 +78,8 @@ def main(argv):
         NN.loadWeights()
 
     # input for prediction
+    if opt_seed:
+        np.random.seed(2)
     zd0, zd1 = map.dataset(0, 2), map.dataset(1, 8)
     z = np.concatenate((zd0, zd1), axis=0)
     z_scaled = z / np.amax(z, axis=0)
@@ -96,6 +103,7 @@ def main(argv):
         print "Correct:"
         print res == z_check
 
+    map.plotTrajectories('report/1_trajectories.png')
     map.plot(z, True)
 
 if __name__ == "__main__":
