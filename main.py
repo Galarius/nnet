@@ -104,7 +104,7 @@ def main(argv):
         print res == z_check
 
     map.plotTrajectories('report/1_trajectories.png')
-    map.plot(z, True)
+    map.plot(z, 'map.png')
 
 if __name__ == "__main__":
     main(sys.argv[1:])
