@@ -31,7 +31,7 @@ class NeuralNetwork(object):
         self.z2_error = self.o_delta.dot(self.W2.T)
         self.z2_delta = self.z2_error * self.sigmoidPrime(self.z2)
 
-        self.W1 += X.T.dot(self.z2_delta)
+        self.W1 += X.T.dot(self.z2_delta)   # gradient
         self.W2 += self.z2.T.dot(self.o_delta)
 
     def train(self, X, y):

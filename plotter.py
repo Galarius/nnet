@@ -10,8 +10,22 @@ from pylab import plt
 def sigmoid(s, a = 1):
     return 1 / (1 + np.exp(- a * s))
 
+def sigmoidPrime(s):
+        return s * (1 - s)
+
 def sigmoidTanh(s, a = 1):
     return np.tanh(s / a)
+
+def plotSigmoidPrime(fname=None):
+    fig, ax = plt.subplots()
+    xs = np.linspace(0.0, 1.0, num = 50, endpoint=True)
+    ys = [sigmoidPrime(x) for x in xs]
+    ax.plot(xs, ys, 'black')
+    plt.title("y=sigmoid'(s)")
+    plt.grid(True)
+    if fname:
+        plt.savefig(fname)
+    plt.show()
 
 def plotSigmoidExp(fname=None):
     fig, ax = plt.subplots()
@@ -67,7 +81,8 @@ def plotSigmoidBias(fname=None):
         plt.savefig(fname)
     plt.show()
 
-plotSigmoidExp('plt_sig_e.png')
-plotSigmoidTanh('plt_sig_tanh.png')
-plotSigmoid('plt_sig_w1.png')
-plotSigmoidBias('plt_sig_w1w2.png')
+plotSigmoidPrime('plt_sig_e_prime.png')
+# plotSigmoidExp('plt_sig_e.png')
+# plotSigmoidTanh('plt_sig_tanh.png')
+# plotSigmoid('plt_sig_w1.png')
+# plotSigmoidBias('plt_sig_w1w2.png')
