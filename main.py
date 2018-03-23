@@ -5,7 +5,7 @@ __author__ = "Ilya Shoshin"
 __copyright__   = "MAI, M30-102-17"
 
 import os
-import sys
+import argparse
 import numpy as np
 
 from nnet import NeuralNetwork
@@ -16,70 +16,59 @@ np.set_printoptions(precision=2, suppress=True)
 def train_data(map):
     (d0, d1) = map.build(40)
     # input
-    X = np.concatenate((d0, d1), axis=0)
+    x = np.concatenate((d0, d1), axis=0)
     # targets
-    yd0 = np.array([[0]] * d0.shape[0], dtype=float)
-    yd1 = np.array([[1]] * d1.shape[0], dtype=float)
-    y = np.concatenate((yd0, yd1), axis=0)
+    td0 = np.array([[0]] * d0.shape[0], dtype=float)
+    td1 = np.array([[1]] * d1.shape[0], dtype=float)
+    t = np.concatenate((td0, td1), axis=0)
     # normalization
-    X = X / np.amax(X, axis=0)
-    # y already normalized
-    return (X, y)
+    x = x / np.amax(x, axis=0)
+    # t already normalized
+    return (x, t)
 
-def help(name):
-    print "{} [-h,-s,-t,-l]".format(name)
+def prediction_data(map, max_n = 50):
+    n = np.sqrt(max_n)
+    (zd0, zd1) = map.dataset(0, np.random.randint(n)), map.dataset(1, np.random.randint(n))
+    z = np.concatenate((zd0, zd1), axis=0)
+    z_scaled = z / np.amax(z, axis=0)
+    # check predicted
+    z_check0 = np.array([[0]] * zd0.shape[0], dtype=float)
+    z_check1 = np.array([[1]] * zd1.shape[0], dtype=float)
+    z_check = np.concatenate((z_check0, z_check1), axis=0)
+    return (x, t)
 
 def main(argv):    
-    opt_train = False
-    opt_log = False
-    opt_seed = False
-    N = 500
+    if args.seed:
+        np.random.seed(args.seed)
 
-    for arg in argv:
-        if arg == '-h':
-            help(sys.argv[0])
-            sys.exit(0)
-        elif arg == '-s':
-            opt_seed = True
-        elif arg == '-t':
-            opt_train = True
-        elif arg == '-l':
-            opt_log = True
-        else:
-            print 'Unrecognized option {}'.format(arg)
-            help(sys.argv[0])
-            sys.exit(2)
-
-    if opt_seed:
-        np.random.seed(1)
     map = Map(20, 20)
-    X, y = train_data(map)
+    x, t = train_data(map)
 
     NN = NeuralNetwork(2, 1)
-    if  opt_train or \
+    if  args.train or \
         not os.path.exists("w1.txt") or \
         not os.path.exists("w2.txt"):
         print 'Training...'
-        if opt_log:
+        if args.logging:
             with open('training.log', 'w') as f:
-                for epoch in xrange(N):
+                for epoch in xrange(args.epochs):
                     f.write('Epoch {}\n'.format(epoch))
-                    f.write("Input:\n{}\n".format(X.T))
-                    f.write("Actual Output:\n{}\n".format(y.T))
-                    f.write("Predicted Output:\n{}\n".format(np.round(NN.forward(X).T)))
-                    f.write("Loss:\n{}\n\n".format(str(np.mean(np.square(y - NN.forward(X))))))
-                    NN.train(X, y)
+                    f.write("Input:\n{}\n".format(x.T))
+                    f.write("Actual Output:\n{}\n".format(t.T))
+                    f.write("Predicted Output:\n{}\n".format(np.round(NN.forward(x).T)))
+                    f.write("Loss:\n{}\n\n".format(str(np.mean(np.square(t - NN.forward(x))))))
+                    NN.train(x, t)
         else:
-            for epoch in xrange(N):
-                NN.train(X, y)
+            for epoch in xrange(args.epochs):
+                NN.train(x, t)
         NN.saveWeights()
         print 'Done.'
     else:
         NN.loadWeights()
 
     # input for prediction
-    if opt_seed:
-        np.random.seed(2)
+    if args.seed:
+        np.random.seed(args.seed + 1)
     zd0, zd1 = map.dataset(0, 2), map.dataset(1, 8)
     z = np.concatenate((zd0, zd1), axis=0)
     z_scaled = z / np.amax(z, axis=0)
@@ -89,7 +78,7 @@ def main(argv):
     z_check = np.concatenate((z_check0, z_check1), axis=0)
 
     print "Predicted data based on trained weights: "
-    print "Input (scaled): \n" + str(X)
+    print "Input (scaled): \n" + str(x)
     print "Input for prediction: \n" + str(z)
     print "Actual:"
     print z_check
@@ -102,8 +91,17 @@ def main(argv):
     else:
         print "{}% are good!".format((res == z_check).sum() * 100 / len(res))
 
-    # map.plotMap('plt_map.png')
-    map.plot(z, 'map.png')
+    if args.plotting:
+        # map.plotMap('plt_map.png')
+        map.plot(z, 'map.png')
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    ap = argparse.ArgumentParser()
+    ap.add_argument('-t', '--train', action='store_true', help='perform training')
+    ap.add_argument('-e', '--epochs', type=int, default=1000, help='train with specified number of epochs')
+    ap.add_argument('-a', '--alpha', type=float, default=0.01, help='gradient descent momentum')
+    ap.add_argument('-s', '--seed',  type=int, default=0, help='seed random generator')
+    ap.add_argument('-l', '--logging', action='store_true', help='write training process into training.log file')
+    ap.add_argument('-p', '--plotting', action='store_true', help='show plot')
+    args = ap.parse_args()
+    main(args)
