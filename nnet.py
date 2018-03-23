@@ -5,9 +5,9 @@ import numpy as np
 
 class NeuralNetwork(object):
     def __init__(self, ni, no):
-        self.inputSize = ni
+        self.inputSize  = ni
         self.outputSize = no
-        self.hiddenSize = ni + 1 # смещение
+        self.hiddenSize = ni + 1
         self.W1 = np.random.randn(self.inputSize, self.hiddenSize)
         self.W2 = np.random.randn(self.hiddenSize, self.outputSize)
     
@@ -21,12 +21,12 @@ class NeuralNetwork(object):
         o = self.sigmoid(self.z3)
         return o
 
-    def backward(self, X, y, o):
+    def backward(self, X, t, y):
         """
         Обратное распространение
         """
-        self.o_error = y - o
-        self.o_delta = self.o_error * self.sigmoidPrime(o)
+        self.o_error = t - y
+        self.o_delta = self.o_error * self.sigmoidPrime(y)
 
         self.z2_error = self.o_delta.dot(self.W2.T)
         self.z2_delta = self.z2_error * self.sigmoidPrime(self.z2)
@@ -34,9 +34,9 @@ class NeuralNetwork(object):
         self.W1 += X.T.dot(self.z2_delta)   # gradient
         self.W2 += self.z2.T.dot(self.o_delta)
 
-    def train(self, X, y):
+    def train(self, X, t):
         o = self.forward(X)
-        self.backward(X, y, o)
+        self.backward(X, t, o)
     
     def predict(self, X):
         return self.forward(X)
@@ -45,7 +45,9 @@ class NeuralNetwork(object):
         return 1 / (1 + np.exp(-s))
 
     def sigmoidPrime(self, s):
-        # derivative of sigmoid
+        """
+        Derivative of sigmoid
+        """
         return s * (1 - s)
 
     def saveWeights(self):
