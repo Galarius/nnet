@@ -102,7 +102,7 @@ def main(argv):
     else:
         print "{}% are good!".format((res == z_check).sum() * 100 / len(res))
 
-    #map.plotMap('report/1_trajectories.png')
+    # map.plotMap('plt_map.png')
     map.plot(z, 'map.png')
 
 if __name__ == "__main__":

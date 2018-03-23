@@ -39,13 +39,13 @@ class Map(object):
         # Triangle Point Picking
         data = []
         if trajectory == 0:
-            data = Map.distrInTriangle(self.o1, self.a, self.o2, npoints, uniform)
+            data = Map.distrInTriangle(self.o1, self.a, self.o2, npoints * 2, uniform)
             p = np.array([0, 0], dtype = float)
             data.extend(Map.distrInTriangle(self.o1, p, self.a, npoints, uniform))
             p = np.array([self.width, 0], dtype = float)
             data.extend(Map.distrInTriangle(self.a, p, self.o2, npoints, uniform))
         else:
-            data = Map.distrInTriangle(self.o1, self.b, self.o2, npoints, uniform)
+            data = Map.distrInTriangle(self.o1, self.b, self.o2, npoints * 2, uniform)
             p = np.array([0, self.height], dtype = float)
             data.extend(Map.distrInTriangle(p, self.o1, self.b, npoints, uniform))
             p = np.array([self.width, self.height], dtype = float)
@@ -64,7 +64,7 @@ class Map(object):
     def plotMap(self, fname=None):
         fig, ax = plt.subplots()
         ax.plot(self.t0[:,0], self.t0[:,1], 'r', label='Trajectory 0')
-        ax.plot(self.t1[:,0], self.t1[:,1], 'b', label='Trajectory 1')
+        ax.plot(self.t1[:,0], self.t1[:,1], 'b--', label='Trajectory 1')
         legend = ax.legend(loc='best', framealpha=0.5)
         plt.title("Map")
         plt.grid(True)
@@ -75,9 +75,9 @@ class Map(object):
     def plot(self, predict, fname=None):
         fig, ax = plt.subplots()
         ax.plot(self.t0[:,0], self.t0[:,1], 'r', label='Trajectory 0')
-        ax.plot(self.t1[:,0], self.t1[:,1], 'b', label='Trajectory 1')
+        ax.plot(self.t1[:,0], self.t1[:,1], 'b--', label='Trajectory 1')
         ax.plot(self.dataset0[:,0], self.dataset0[:,1], 'ro', label='Train Dataset 0')
-        ax.plot(self.dataset1[:,0], self.dataset1[:,1], 'bo', label='Train Dataset 1')
+        ax.plot(self.dataset1[:,0], self.dataset1[:,1], 'b*', label='Train Dataset 1')
         ax.plot(predict[:,0], predict[:,1], 'go', markersize=10, label='Dataset to Predict')
         legend = ax.legend(loc='best', framealpha=0.5)
         plt.title("Map")
