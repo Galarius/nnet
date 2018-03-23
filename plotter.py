@@ -53,13 +53,13 @@ def plotSigmoid(fname=None):
     fig, ax = plt.subplots()
     xs = np.linspace(-10.0, 10.0, num = 50, endpoint=True)
     ys = [sigmoid(0.5 * x) for x in xs]
-    ax.plot(xs, ys, 'r', label='sig(0.5 * x)')
+    ax.plot(xs, ys, 'black', linestyle='-', label='sig(0.5 * x)')
     ys = [sigmoid(1.0 * x) for x in xs]
-    ax.plot(xs, ys, 'g--', label='sig(1.0 * x)')
+    ax.plot(xs, ys, 'black', linestyle='--', label='sig(1.0 * x)')
     ys = [sigmoid(2.5 * x) for x in xs]
-    ax.plot(xs, ys, 'b.', label='sig(2.5 * x)')
+    ax.plot(xs, ys, 'black', linestyle='-.', label='sig(2.5 * x)')
     legend = ax.legend(loc='best', framealpha=0.5)
-    plt.title("y=sigmoid(Input * W1)")
+    plt.title("y=sig(s * w1)")
     plt.grid(True)
     if fname:
         plt.savefig(fname)
@@ -69,20 +69,20 @@ def plotSigmoidBias(fname=None):
     fig, ax = plt.subplots()
     xs = np.linspace(-10.0, 10.0, num = 50, endpoint=True)
     ys = [sigmoid(1.0 * x - 5.0) for x in xs]
-    ax.plot(xs, ys, 'r', label='sig(1.0 * x - 5 * 1.0)')
+    ax.plot(xs, ys, 'black', linestyle='-', label='sig(1.0 * x - 1.0 * 5)')
     ys = [sigmoid(1.0 * x) for x in xs]
-    ax.plot(xs, ys, 'g--', label='sig(1.0 * x + 0 * 1.0)')
+    ax.plot(xs, ys, 'black', linestyle='--', label='sig(1.0 * x + 1.0 * 0)')
     ys = [sigmoid(1.0 * x + 5.0) for x in xs]
-    ax.plot(xs, ys, 'b.', label='sig(1.0 * x + 5 * 1.0)')
+    ax.plot(xs, ys, 'black', linestyle='-.', label='sig(1.0 * x + 1.0 * 5)')
     legend = ax.legend(loc='best', framealpha=0.5)
-    plt.title("y=sigmoid(Input * W1 + 1.0 * W2)")
+    plt.title("y=sig(s * w1 + 1.0 * w2)")
     plt.grid(True)
     if fname:
         plt.savefig(fname)
     plt.show()
 
-plotSigmoidPrime('plt_sig_e_prime.png')
+# plotSigmoidPrime('plt_sig_e_prime.png')
 # plotSigmoidExp('plt_sig_e.png')
 # plotSigmoidTanh('plt_sig_tanh.png')
-# plotSigmoid('plt_sig_w1.png')
-# plotSigmoidBias('plt_sig_w1w2.png')
+plotSigmoid('plt_sig_w1.png')
+plotSigmoidBias('plt_sig_w1w2.png')
