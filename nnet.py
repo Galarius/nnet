@@ -10,6 +10,7 @@ class NeuralNetwork(object):
         self.hiddenSize = ni + 1
         self.W1 = np.random.randn(self.inputSize, self.hiddenSize)
         self.W2 = np.random.randn(self.hiddenSize, self.outputSize)
+        self.bias = np.random.uniform()
     
     def forward(self, X):
         """
@@ -17,7 +18,7 @@ class NeuralNetwork(object):
         """
         self.z = np.dot(X, self.W1)
         self.z2 = self.sigmoid(self.z)
-        self.z3 = np.dot(self.z2, self.W2)
+        self.z3 = np.dot(self.z2, self.W2) + self.bias
         o = self.sigmoid(self.z3)
         return o
 
