@@ -44,7 +44,7 @@ def main(argv):
     map = Map(20, 20)
     x, t = train_data(map)
 
-    NN = NeuralNetwork(2, 1)
+    NN = NeuralNetwork(2, 3, 1, True)
     if  args.train or \
         not os.path.exists("w1.txt") or \
         not os.path.exists("w2.txt"):
