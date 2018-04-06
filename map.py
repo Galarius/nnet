@@ -34,6 +34,10 @@ class Map(object):
         self.b = np.array([np.random.randint(self.width-4) + 2, self.height], dtype=float)
         # цель
         self.o2 = np.array([self.width, np.random.randint(self.height-2)+1], dtype=float)
+# генерация траектории o-a-c
+        self.t0  = np.array(self._generate(self.o1, self.a, self.o2), dtype=float)
+        # генерация траектории o-b-c
+        self.t1  = np.array(self._generate(self.o1, self.b, self.o2), dtype=float)
 
     def dataset(self, trajectory, npoints, uniform = True):
         # Triangle Point Picking
@@ -51,15 +55,6 @@ class Map(object):
             p = np.array([self.width, self.height], dtype = float)
             data.extend(Map.distrInTriangle(self.b, self.o2, p, npoints, uniform))
         return np.array(data)
-        
-    def build(self, dsize):
-        # генерация траектории o-a-c
-        self.t0  = np.array(self._generate(self.o1, self.a, self.o2), dtype=float)
-        # генерация траектории o-b-c
-        self.t1  = np.array(self._generate(self.o1, self.b, self.o2), dtype=float)
-        self.dataset0 = self.dataset(0, dsize)
-        self.dataset1 = self.dataset(1, dsize)
-        return (self.dataset0, self.dataset1)
 
     def plotMap(self, fname=None):
         fig, ax = plt.subplots()
@@ -72,12 +67,14 @@ class Map(object):
             plt.savefig(fname)
         plt.show()
 
-    def plot(self, good, bad, fname=None):
+    def plot(self, good, bad, dataset0, dataset1, fname=None):
         fig, ax = plt.subplots()
         ax.plot(self.t0[:,0], self.t0[:,1], 'r', label='Trajectory 0')
         ax.plot(self.t1[:,0], self.t1[:,1], 'b--', label='Trajectory 1')
-        ax.plot(self.dataset0[:,0], self.dataset0[:,1], 'ro', label='Train Dataset 0')
-        ax.plot(self.dataset1[:,0], self.dataset1[:,1], 'b*', label='Train Dataset 1')
+        if dataset0.any():
+            ax.plot(dataset0[:,0], dataset0[:,1], 'ro', label='Train Dataset 0')
+        if dataset1.any():
+            ax.plot(dataset1[:,0], dataset1[:,1], 'b*', label='Train Dataset 1')
         ax.plot(good[:,0], good[:,1], 'go', markersize=10, label='Correct prediction')
         ax.plot(bad[:,0], bad[:,1], 'black', linestyle='none', marker='D', markersize=10, label='Incorrect prediction')
         legend = ax.legend(loc='best', framealpha=0.5)

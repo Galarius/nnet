@@ -14,27 +14,27 @@ class NeuralNetwork(object):
         self.bias = use_bias if np.random.uniform() else 0
     
     def forward(self, x):
-        """
-        Прямое распространение
-        """
-        self.z = np.dot(x, self.w_in_h)
-        self.z2 = self.sigmoid(self.z)
-        self.z3 = np.dot(self.z2, self.w_h_out) + self.bias
-        o = self.sigmoid(self.z3)
-        return o
+        "Прямое распространение"
+        # скалярное произведение входных данных и весов
+        self.s_h = np.dot(x, self.w_in_h) 
+        # активация нейронов скрытого слоя
+        self.y_h = self.sigmoid(self.s_h) 
+        # скалярное произведение активированных нейронов
+        # скрытого слоя и весов + вес синопса от нейрона смещения
+        self.s_o = np.dot(self.y_h, self.w_h_out) + self.bias
+        # активация нейронов выходного слоя
+        return self.sigmoid(self.s_o)
 
     def backward(self, x, t, y):
-        """
-        Обратное распространение
-        """
+        "Обратное распространение"
         self.o_error = t - y
         self.o_delta = self.o_error * self.sigmoidPrime(y)
 
         self.z2_error = self.o_delta.dot(self.w_h_out.T)
-        self.z2_delta = self.z2_error * self.sigmoidPrime(self.z2)
+        self.z2_delta = self.z2_error * self.sigmoidPrime(self.y_h)
 
         self.w_in_h += x.T.dot(self.z2_delta)   # gradient
-        self.w_h_out += self.z2.T.dot(self.o_delta)
+        self.w_h_out += self.y_h.T.dot(self.o_delta)
 
     def train(self, x, t):
         o = self.forward(x)
@@ -44,6 +44,7 @@ class NeuralNetwork(object):
         return self.forward(x)
 
     def sigmoid(self, s):
+        "Сигмоидальная логистическая функция активации"
         return 1 / (1 + np.exp(-s))
 
     def sigmoidPrime(self, s):

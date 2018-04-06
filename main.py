@@ -11,58 +11,47 @@ import numpy as np
 from nnet import NeuralNetwork
 from map import Map
 
+MAP_WIDTH = 20
+MAP_HEIGHT = 20
+
 np.set_printoptions(precision=2, suppress=True)
-
-def train_data(map):
-    (d0, d1) = map.build(40)
-    # input
-    x = np.concatenate((d0, d1), axis=0)
-    # targets
-    td0 = np.array([[0]] * d0.shape[0], dtype=float)
-    td1 = np.array([[1]] * d1.shape[0], dtype=float)
-    t = np.concatenate((td0, td1), axis=0)
-    # normalization
-    x = x / np.amax(x, axis=0)
-    # t already normalized
-    return (x, t)
-
-def prediction_data(map, max_n = 50):
-    n = np.sqrt(max_n)
-    (zd0, zd1) = map.dataset(0, np.random.randint(n)), map.dataset(1, np.random.randint(n))
-    z = np.concatenate((zd0, zd1), axis=0)
-    z_scaled = z / np.amax(z, axis=0)
-    # check predicted
-    z_check0 = np.array([[0]] * zd0.shape[0], dtype=float)
-    z_check1 = np.array([[1]] * zd1.shape[0], dtype=float)
-    z_check = np.concatenate((z_check0, z_check1), axis=0)
-    return (x, t)
 
 def main(argv):    
     if args.seed:
         np.random.seed(args.seed)
 
-    map = Map(20, 20)
-    x, t = train_data(map)
-
+    map = Map(MAP_WIDTH, MAP_HEIGHT)
     NN = NeuralNetwork(2, 3, 1, args.bias)
     if  args.train:
+        # get datasets for map
+        train_d0, train_d1 = map.dataset(0, np.random.randint((MAP_WIDTH + MAP_HEIGHT))), \
+                             map.dataset(1, np.random.randint((MAP_WIDTH + MAP_HEIGHT)))
+        # input
+        x = np.concatenate((train_d0, train_d1), axis=0)
+        x_normalized = x / np.amax(x, axis=0)
+        # targets
+        td0 = np.array([[0]] * train_d0.shape[0], dtype=float)
+        td1 = np.array([[1]] * train_d1.shape[0], dtype=float)
+        t = np.concatenate((td0, td1), axis=0)
+        # t already normalized        
         print 'Training...'
         if args.logging:
             with open('training.log', 'w') as f:
                 for epoch in xrange(args.epochs):
                     f.write('Epoch {}\n'.format(epoch))
-                    f.write("Input:\n{}\n".format(x.T))
+                    f.write("Input:\n{}\n".format(x_normalized.T))
                     f.write("Actual Output:\n{}\n".format(t.T))
-                    f.write("Predicted Output:\n{}\n".format(np.round(NN.forward(x).T)))
-                    f.write("Loss:\n{}\n\n".format(str(np.mean(np.square(t - NN.forward(x))))))
-                    NN.train(x, t)
+                    f.write("Predicted Output:\n{}\n".format(np.round(NN.forward(x_normalized).T)))
+                    f.write("Loss:\n{}\n\n".format(str(np.mean(np.square(t - NN.forward(x_normalized))))))
+                    NN.train(x_normalized, t)
         else:
             for epoch in xrange(args.epochs):
-                NN.train(x, t)
+                NN.train(x_normalized, t)
         print "Saving weights..."
         NN.saveWeights()
         print 'Done.'
     else:
+        train_d0 = train_d1 = np.array([])
         if os.path.exists("w_in_h.txt") and \
            os.path.exists("w_h_out.txt"):
            print "Loading weights..."
@@ -74,40 +63,44 @@ def main(argv):
     # input for prediction
     if args.seed:
         np.random.seed(args.seed + 1)
-    zd0, zd1 = map.dataset(0, 2), map.dataset(1, 8)
-    z = np.concatenate((zd0, zd1), axis=0)
-    z_scaled = z / np.amax(z, axis=0)
-    # check predicted
-    z_check0 = np.array([[0]] * zd0.shape[0], dtype=float)
-    z_check1 = np.array([[1]] * zd1.shape[0], dtype=float)
-    z_check = np.concatenate((z_check0, z_check1), axis=0)
+    
+    # get test dataset for map
+    zds0, zds1 = np.random.randint(2, 20), np.random.randint(2, 20)
+    d0, d1 = map.dataset(0, zds0), map.dataset(1, zds1)
+    # input
+    x = np.concatenate((d0, d1), axis=0)
+    x_normalized = x / np.amax(x, axis=0)
+    # targets
+    td0 = np.array([[0]] * d0.shape[0], dtype=float)
+    td1 = np.array([[1]] * d1.shape[0], dtype=float)
+    t = np.concatenate((td0, td1), axis=0)
+    # t already normalized        
 
-    res = np.round(NN.predict(z_scaled))
+    y = np.round(NN.predict(x_normalized))
     if args.verbose:
-        print "Predicted data based on trained weights: "
-        print "Input (scaled): \n" + str(x)
-        print "Input for prediction: \n" + str(z)
-        print "Actual:"
-        print z_check
-        print "Output:"
-        print res
+        print "Input:"
+        print x
+        print "Output (Expected):"
+        print t
+        print "Output (Actual):"
+        print y
 
-    compare_res = (res == z_check)
-    if compare_res.all():
+    res = (y == t)
+    if res.all():
         print "\nAll Good!"
     else:
-        print "{}% are good!".format(compare_res.sum() * 100 / len(res))
+        print "{}% are good!".format(res.sum() * 100 / len(res))
 
     if args.plotting:
         # filter good from bad hits
         good = []
         bad = []
-        for i, v in enumerate(compare_res):
+        for i, v in enumerate(res):
             if v:
-                good.append(z[i])
+                good.append(x[i])
             else:
-                bad.append(z[i])
-        map.plot(np.array(good), np.array(bad), args.plot_name)
+                bad.append(x[i])
+        map.plot(np.array(good), np.array(bad), train_d0, train_d1, args.plot_name)
         # map.plotMap('plt_map.png')
 
 if __name__ == "__main__":
