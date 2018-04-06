@@ -9,39 +9,39 @@ class NeuralNetwork(object):
         self.n_hl  = n_hl
         self.n_out = n_out
 
-        self.w1 = np.random.randn(self.n_in, self.n_hl)
-        self.w2 = np.random.randn(self.n_hl, self.n_out)
+        self.w_in_h = np.random.randn(self.n_in, self.n_hl)
+        self.w_h_out = np.random.randn(self.n_hl, self.n_out)
         self.bias = use_bias if np.random.uniform() else 0
     
-    def forward(self, X):
+    def forward(self, x):
         """
         Прямое распространение
         """
-        self.z = np.dot(X, self.w1)
+        self.z = np.dot(x, self.w_in_h)
         self.z2 = self.sigmoid(self.z)
-        self.z3 = np.dot(self.z2, self.w2) + self.bias
+        self.z3 = np.dot(self.z2, self.w_h_out) + self.bias
         o = self.sigmoid(self.z3)
         return o
 
-    def backward(self, X, t, y):
+    def backward(self, x, t, y):
         """
         Обратное распространение
         """
         self.o_error = t - y
         self.o_delta = self.o_error * self.sigmoidPrime(y)
 
-        self.z2_error = self.o_delta.dot(self.w2.T)
+        self.z2_error = self.o_delta.dot(self.w_h_out.T)
         self.z2_delta = self.z2_error * self.sigmoidPrime(self.z2)
 
-        self.w1 += X.T.dot(self.z2_delta)   # gradient
-        self.w2 += self.z2.T.dot(self.o_delta)
+        self.w_in_h += x.T.dot(self.z2_delta)   # gradient
+        self.w_h_out += self.z2.T.dot(self.o_delta)
 
-    def train(self, X, t):
-        o = self.forward(X)
-        self.backward(X, t, o)
+    def train(self, x, t):
+        o = self.forward(x)
+        self.backward(x, t, o)
     
-    def predict(self, X):
-        return self.forward(X)
+    def predict(self, x):
+        return self.forward(x)
 
     def sigmoid(self, s):
         return 1 / (1 + np.exp(-s))
@@ -53,11 +53,11 @@ class NeuralNetwork(object):
         return s * (1 - s)
 
     def saveWeights(self):
-        np.savetxt("w1.txt", self.w1, fmt="%s")
-        np.savetxt("w2.txt", self.w2, fmt="%s")
+        np.savetxt("w_in_h.txt", self.w_in_h, fmt="%s")
+        np.savetxt("w_h_out.txt", self.w_h_out, fmt="%s")
     
     def loadWeights(self):
-        self.w1 = np.loadtxt("w1.txt", dtype=float)
-        self.w2 = np.loadtxt("w2.txt", dtype=float)
-        self.w2 = self.w2.reshape(self.w2.shape[0], 1)
+        self.w_in_h = np.loadtxt("w_in_h.txt", dtype=float)
+        self.w_h_out = np.loadtxt("w_h_out.txt", dtype=float)
+        self.w_h_out = self.w_h_out.reshape(self.w_h_out.shape[0], 1)
         

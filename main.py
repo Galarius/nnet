@@ -44,10 +44,8 @@ def main(argv):
     map = Map(20, 20)
     x, t = train_data(map)
 
-    NN = NeuralNetwork(2, 3, 1, True)
-    if  args.train or \
-        not os.path.exists("w1.txt") or \
-        not os.path.exists("w2.txt"):
+    NN = NeuralNetwork(2, 3, 1, args.bias)
+    if  args.train:
         print 'Training...'
         if args.logging:
             with open('training.log', 'w') as f:
@@ -61,10 +59,17 @@ def main(argv):
         else:
             for epoch in xrange(args.epochs):
                 NN.train(x, t)
+        print "Saving weights..."
         NN.saveWeights()
         print 'Done.'
     else:
-        NN.loadWeights()
+        if os.path.exists("w_in_h.txt") and \
+           os.path.exists("w_h_out.txt"):
+           print "Loading weights..."
+           NN.loadWeights()
+           print 'Done.'
+        else:
+            print "No weights were found!"
 
     # input for prediction
     if args.seed:
@@ -77,14 +82,15 @@ def main(argv):
     z_check1 = np.array([[1]] * zd1.shape[0], dtype=float)
     z_check = np.concatenate((z_check0, z_check1), axis=0)
 
-    print "Predicted data based on trained weights: "
-    print "Input (scaled): \n" + str(x)
-    print "Input for prediction: \n" + str(z)
-    print "Actual:"
-    print z_check
-    print "Output:"
     res = np.round(NN.predict(z_scaled))
-    print res
+    if args.verbose:
+        print "Predicted data based on trained weights: "
+        print "Input (scaled): \n" + str(x)
+        print "Input for prediction: \n" + str(z)
+        print "Actual:"
+        print z_check
+        print "Output:"
+        print res
 
     if (res == z_check).all():
         print "\nAll Good!"
@@ -93,15 +99,18 @@ def main(argv):
 
     if args.plotting:
         # map.plotMap('plt_map.png')
-        map.plot(z, 'map.png')
+        map.plot(z, args.plot_name)
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
+    ap.add_argument('-b', '--bias', action='store_true', help='use bias neuron in hidden layer')
     ap.add_argument('-t', '--train', action='store_true', help='perform training')
     ap.add_argument('-e', '--epochs', type=int, default=1000, help='train with specified number of epochs')
     ap.add_argument('-a', '--alpha', type=float, default=0.01, help='gradient descent momentum')
     ap.add_argument('-s', '--seed',  type=int, default=0, help='seed random generator')
     ap.add_argument('-l', '--logging', action='store_true', help='write training process into training.log file')
     ap.add_argument('-p', '--plotting', action='store_true', help='show plot')
+    ap.add_argument('-n', '--plot-name',  type=str, default='map.png', help='plot name')
+    ap.add_argument('-v', '--verbose', action='store_true', help='verbose output')
     args = ap.parse_args()
     main(args)
