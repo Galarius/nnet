@@ -28,14 +28,14 @@ class NeuralNetwork(object):
         # активация нейронов выходного слоя
         return self.sigmoid(s_o)
 
-    def backward(self, x, t, y, e = 1, a = 1):
+    def backward(self, x, t, y, alpha, es):
         """
         Обратное распространение (RMS Loss Function)
         :param x - вход
         :param t - ожидаемый результат
         :param y - реальный результат
-        :param e - скорость обучения
-        :param a - момент 
+        :param alpha - момент 
+        :param es - скорость обучения
         """
         o_error = t - y  # ошибка для выходного слоя
         o_delta = o_error * self.sigmoid_prime(y)
@@ -45,13 +45,19 @@ class NeuralNetwork(object):
         h_delta = h_error * self.sigmoid_prime(self.y_h)
         h_grad = x.T.dot(h_delta)
         # изменение весов
-        self.w_in_h = e * h_grad + a * self.w_in_h
-        self.w_h_out = e * o_grad + a * self.w_h_out
+        self.w_in_h = es * h_grad + alpha * self.w_in_h
+        self.w_h_out = es * o_grad + alpha * self.w_h_out
 
-    def train(self, x, t):
-        "Обучение"
+    def train(self, x, t, alpha, es):
+        """
+        Обучение
+        :param x - вход
+        :param t - ожидаемый результат
+        :param alpha - момент 
+        :param es - скорость обучения
+        """
         o = self.forward(x)     # прямое распространение
-        self.backward(x, t, o)  # обратное распространение
+        self.backward(x, t, o, alpha, es)  # обратное распространение
     
     def predict(self, x):
         return self.forward(x)
@@ -71,7 +77,7 @@ class NeuralNetwork(object):
     
     def load_weights(self, f_w_in_h, f_w_h_out):
         "Загрузка весов из файла"
-        self.w_in_h = np.loadtxt(f_w_in_h, f_w_h_out, dtype=float)
+        self.w_in_h = np.loadtxt(f_w_in_h, dtype=float)
         self.w_h_out = np.loadtxt(f_w_h_out, dtype=float)
         self.w_h_out = self.w_h_out.reshape(self.w_h_out.shape[0], 1)
         

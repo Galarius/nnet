@@ -75,8 +75,10 @@ class Map(object):
             ax.plot(dataset0[:,0], dataset0[:,1], 'ro', label='Train Dataset 0')
         if dataset1.any():
             ax.plot(dataset1[:,0], dataset1[:,1], 'b*', label='Train Dataset 1')
-        ax.plot(good[:,0], good[:,1], 'go', markersize=10, label='Correct prediction')
-        ax.plot(bad[:,0], bad[:,1], 'black', linestyle='none', marker='D', markersize=10, label='Incorrect prediction')
+        if good.any():
+            ax.plot(good[:,0], good[:,1], 'go', markersize=10, label='Correct prediction')
+        if bad.any():
+            ax.plot(bad[:,0], bad[:,1], 'black', linestyle='none', marker='D', markersize=10, label='Incorrect prediction')
         legend = ax.legend(loc='best', framealpha=0.5)
         plt.title("Map")
         plt.grid(True)

@@ -27,8 +27,8 @@ def main(argv):
     net = NeuralNetwork(2, 3, 1, args.bias)
     if  args.train:
         # get datasets for map
-        train_d0, train_d1 = map.dataset(0, np.random.randint((MAP_WIDTH + MAP_HEIGHT))), \
-                             map.dataset(1, np.random.randint((MAP_WIDTH + MAP_HEIGHT)))
+        train_d0, train_d1 = map.dataset(0, MAP_WIDTH + MAP_HEIGHT), \
+                             map.dataset(1, MAP_WIDTH + MAP_HEIGHT)
         # input
         x = np.concatenate((train_d0, train_d1), axis=0)
         x_normalized = x / np.amax(x, axis=0)
@@ -49,7 +49,7 @@ def main(argv):
                     net.train(x_normalized, t)
         else:
             for epoch in xrange(args.epochs):
-                net.train(x_normalized, t)
+                net.train(x_normalized, t, args.alpha, args.train_speed)
         print "Saving weights..."
         net.save_weights(F_W_IN_H, F_W_H_OUT)
         print 'Done.'
@@ -111,7 +111,8 @@ if __name__ == "__main__":
     ap.add_argument('-b', '--bias', action='store_true', help='use bias neuron in hidden layer')
     ap.add_argument('-t', '--train', action='store_true', help='perform training')
     ap.add_argument('-e', '--epochs', type=int, default=1000, help='train with specified number of epochs')
-    ap.add_argument('-a', '--alpha', type=float, default=0.01, help='gradient descent momentum')
+    ap.add_argument('-a', '--alpha', type=float, default=1, help='gradient descent momentum')
+    ap.add_argument('--train-speed', type=float, default=1, help='gradient descent train speed')
     ap.add_argument('-s', '--seed',  type=int, default=0, help='seed random generator')
     ap.add_argument('-l', '--logging', action='store_true', help='write training process into training.log file')
     ap.add_argument('-p', '--plotting', action='store_true', help='show plot')
