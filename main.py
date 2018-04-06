@@ -14,6 +14,9 @@ from map import Map
 MAP_WIDTH = 20
 MAP_HEIGHT = 20
 
+F_W_IN_H = "w_in_h.txt"
+F_W_H_OUT = "w_h_out.txt"
+
 np.set_printoptions(precision=2, suppress=True)
 
 def main(argv):    
@@ -21,7 +24,7 @@ def main(argv):
         np.random.seed(args.seed)
 
     map = Map(MAP_WIDTH, MAP_HEIGHT)
-    NN = NeuralNetwork(2, 3, 1, args.bias)
+    net = NeuralNetwork(2, 3, 1, args.bias)
     if  args.train:
         # get datasets for map
         train_d0, train_d1 = map.dataset(0, np.random.randint((MAP_WIDTH + MAP_HEIGHT))), \
@@ -41,21 +44,21 @@ def main(argv):
                     f.write('Epoch {}\n'.format(epoch))
                     f.write("Input:\n{}\n".format(x_normalized.T))
                     f.write("Actual Output:\n{}\n".format(t.T))
-                    f.write("Predicted Output:\n{}\n".format(np.round(NN.forward(x_normalized).T)))
-                    f.write("Loss:\n{}\n\n".format(str(np.mean(np.square(t - NN.forward(x_normalized))))))
-                    NN.train(x_normalized, t)
+                    f.write("Predicted Output:\n{}\n".format(np.round(net.forward(x_normalized).T)))
+                    f.write("Loss:\n{}\n\n".format(str(np.mean(np.square(t - net.forward(x_normalized))))))
+                    net.train(x_normalized, t)
         else:
             for epoch in xrange(args.epochs):
-                NN.train(x_normalized, t)
+                net.train(x_normalized, t)
         print "Saving weights..."
-        NN.saveWeights()
+        net.save_weights(F_W_IN_H, F_W_H_OUT)
         print 'Done.'
     else:
         train_d0 = train_d1 = np.array([])
-        if os.path.exists("w_in_h.txt") and \
-           os.path.exists("w_h_out.txt"):
+        if os.path.exists(F_W_IN_H) and \
+           os.path.exists(F_W_H_OUT):
            print "Loading weights..."
-           NN.loadWeights()
+           net.load_weights(F_W_IN_H, F_W_H_OUT)
            print 'Done.'
         else:
             print "No weights were found!"
@@ -76,7 +79,7 @@ def main(argv):
     t = np.concatenate((td0, td1), axis=0)
     # t already normalized        
 
-    y = np.round(NN.predict(x_normalized))
+    y = np.round(net.predict(x_normalized))
     if args.verbose:
         print "Input:"
         print x
