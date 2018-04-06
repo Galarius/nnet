@@ -92,14 +92,23 @@ def main(argv):
         print "Output:"
         print res
 
-    if (res == z_check).all():
+    compare_res = (res == z_check)
+    if compare_res.all():
         print "\nAll Good!"
     else:
-        print "{}% are good!".format((res == z_check).sum() * 100 / len(res))
+        print "{}% are good!".format(compare_res.sum() * 100 / len(res))
 
     if args.plotting:
+        # filter good from bad hits
+        good = []
+        bad = []
+        for i, v in enumerate(compare_res):
+            if v:
+                good.append(z[i])
+            else:
+                bad.append(z[i])
+        map.plot(np.array(good), np.array(bad), args.plot_name)
         # map.plotMap('plt_map.png')
-        map.plot(z, args.plot_name)
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()

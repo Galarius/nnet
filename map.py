@@ -72,13 +72,14 @@ class Map(object):
             plt.savefig(fname)
         plt.show()
 
-    def plot(self, predict, fname=None):
+    def plot(self, good, bad, fname=None):
         fig, ax = plt.subplots()
         ax.plot(self.t0[:,0], self.t0[:,1], 'r', label='Trajectory 0')
         ax.plot(self.t1[:,0], self.t1[:,1], 'b--', label='Trajectory 1')
         ax.plot(self.dataset0[:,0], self.dataset0[:,1], 'ro', label='Train Dataset 0')
         ax.plot(self.dataset1[:,0], self.dataset1[:,1], 'b*', label='Train Dataset 1')
-        ax.plot(predict[:,0], predict[:,1], 'go', markersize=10, label='Dataset to Predict')
+        ax.plot(good[:,0], good[:,1], 'go', markersize=10, label='Correct prediction')
+        ax.plot(bad[:,0], bad[:,1], 'black', linestyle='none', marker='D', markersize=10, label='Incorrect prediction')
         legend = ax.legend(loc='best', framealpha=0.5)
         plt.title("Map")
         plt.grid(True)
