@@ -13,9 +13,7 @@ from map import Map
 
 MAP_WIDTH = 20
 MAP_HEIGHT = 20
-
-F_W_IN_H = "w_in_h.txt"
-F_W_H_OUT = "w_h_out.txt"
+W_PREFIX = 'weights'
 
 np.set_printoptions(precision=2, suppress=True)
 
@@ -24,7 +22,8 @@ def main(argv):
         np.random.seed(args.seed)
 
     map = Map(MAP_WIDTH, MAP_HEIGHT)
-    net = NeuralNetwork(2, 3, 1, args.bias)
+    net = NeuralNetwork(2, args.layer_neurons, 1, args.hidden_layers, args.bias)
+    print net
     if  args.train:
         # get datasets for map
         train_d0, train_d1 = map.dataset(0, MAP_WIDTH + MAP_HEIGHT), \
@@ -51,14 +50,13 @@ def main(argv):
             for epoch in xrange(args.epochs):
                 net.train(x_normalized, t, args.alpha, args.train_speed)
         print "Saving weights..."
-        net.save_weights(F_W_IN_H, F_W_H_OUT)
+        net.save_weights(W_PREFIX)
         print 'Done.'
     else:
         train_d0 = train_d1 = np.array([])
-        if os.path.exists(F_W_IN_H) and \
-           os.path.exists(F_W_H_OUT):
+        if os.path.exists('{}_0.txt'.format(W_PREFIX)):
            print "Loading weights..."
-           net.load_weights(F_W_IN_H, F_W_H_OUT)
+           net.load_weights(W_PREFIX)
            print 'Done.'
         else:
             print "No weights were found!"
@@ -109,10 +107,12 @@ def main(argv):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument('-b', '--bias', action='store_true', help='use bias neuron in hidden layer')
+    ap.add_argument('-i', '--hidden-layers', type=int, default=1, help='number of hidden layers')
+    ap.add_argument('-j', '--layer-neurons', type=int, default=3, help='number of neurons in hidden layers')
     ap.add_argument('-t', '--train', action='store_true', help='perform training')
     ap.add_argument('-e', '--epochs', type=int, default=1000, help='train with specified number of epochs')
     ap.add_argument('-a', '--alpha', type=float, default=1, help='gradient descent momentum')
-    ap.add_argument('--train-speed', type=float, default=1, help='gradient descent train speed')
+    ap.add_argument('-x','--train-speed', type=float, default=1, help='gradient descent train speed')
     ap.add_argument('-s', '--seed',  type=int, default=0, help='seed random generator')
     ap.add_argument('-l', '--logging', action='store_true', help='write training process into training.log file')
     ap.add_argument('-p', '--plotting', action='store_true', help='show plot')

@@ -4,29 +4,40 @@
 import numpy as np
 
 class NeuralNetwork(object):
-    def __init__(self, n_in, n_hl, n_out, use_bias = False):
+    def __init__(self, n_in, n_hl, n_out, n_hlayers, use_bias):
         self.n_in  = n_in  # кол-во нейронов в входном слое
         self.n_hl  = n_hl  # кол-во нейронов в скрытом слое
         self.n_out = n_out # кол-во нейронов в выходном слое
+        self.n_hlayers = n_hlayers if n_hlayers > 0 else 1 
+        self.w_layers = []
         # случайное назначение весов (вход -> скрытый слой)
-        self.w_in_h = np.random.randn(self.n_in, self.n_hl)
+        self.w_layers.append(np.random.randn(self.n_in, self.n_hl))
+        # случайное назначение весов (скрытый слой -> скрытый слой)
+        if self.n_hlayers > 1:
+            for _ in range(0, self.n_hlayers - 1):
+                self.w_layers.append(np.random.randn(self.n_hl, self.n_hl))
         # случайное назначение весов (скрытый слой -> выход)
-        self.w_h_out = np.random.randn(self.n_hl, self.n_out)
+        self.w_layers.append(np.random.randn(self.n_hl, self.n_out))
         # случайный вес синопса, исходящего из 
         # нейрона смещения в скрытом слое
         self.bias = use_bias if np.random.uniform() else 0
     
     def forward(self, x):
         "Прямое распространение"
-        # скалярное произведение входных данных и весов
-        s_h = np.dot(x, self.w_in_h) 
-        # активация нейронов скрытого слоя
-        self.y_h = self.sigmoid(s_h) 
-        # скалярное произведение активированных нейронов
-        # скрытого слоя и весов + вес синопса от нейрона смещения
-        s_o = np.dot(self.y_h, self.w_h_out) + self.bias
-        # активация нейронов выходного слоя
-        return self.sigmoid(s_o)
+        self.ys = []
+        # in -> h
+        s_h = np.dot(x, self.w_layers[0])
+        y_h = self.sigmoid(s_h)
+        self.ys.append(y_h)
+        # h -> h -> h
+        if self.n_hlayers > 1:
+            for i in range(0, self.n_hlayers - 1):
+                s_h = np.dot(y_h, self.w_layers[i + 1]) + self.bias
+                y_h = self.sigmoid(s_h)
+                self.ys.append(y_h)
+        # h -> out
+        s_h = np.dot(y_h, self.w_layers[-1]) + self.bias
+        return self.sigmoid(s_h)
 
     def backward(self, x, t, y, alpha, es):
         """
@@ -37,16 +48,25 @@ class NeuralNetwork(object):
         :param alpha - момент 
         :param es - скорость обучения
         """
-        o_error = t - y  # ошибка для выходного слоя
-        o_delta = o_error * self.sigmoid_prime(y)
-        o_grad = self.y_h.T.dot(o_delta)
-        # ошибка для скрытого слоя
-        h_error = o_delta.dot(self.w_h_out.T)
-        h_delta = h_error * self.sigmoid_prime(self.y_h)
-        h_grad = x.T.dot(h_delta)
-        # изменение весов
-        self.w_in_h = es * h_grad + alpha * self.w_in_h
-        self.w_h_out = es * o_grad + alpha * self.w_h_out
+        grads = []
+        # ошибка для выходного слоя
+        error = t - y
+        delta = error * self.sigmoid_prime(y)
+        grads.append(self.ys[-1].T.dot(delta))
+        # ошибки для скрытых слоёв
+        if self.n_hlayers > 1:
+            for i in range(self.n_hlayers - 1, 0, -1):
+                error = delta.dot(self.w_layers[i+1].T)
+                delta = error * self.sigmoid_prime(self.ys[i])
+                grads.append(self.ys[i-1].T.dot(delta))
+        # ошибка для входного слоя
+        error = delta.dot(self.w_layers[1].T)
+        delta = error * self.sigmoid_prime(self.ys[0])
+        grads.append(x.T.dot(delta))
+        # корректировка весов
+        s = len(grads)
+        for i in range(0, s):
+            self.w_layers[i] = es * grads[s-1-i] + alpha * self.w_layers[i] 
 
     def train(self, x, t, alpha, es):
         """
@@ -56,8 +76,8 @@ class NeuralNetwork(object):
         :param alpha - момент 
         :param es - скорость обучения
         """
-        o = self.forward(x)     # прямое распространение
-        self.backward(x, t, o, alpha, es)  # обратное распространение
+        y = self.forward(x)                # прямое распространение
+        self.backward(x, t, y, alpha, es)  # обратное распространение
     
     def predict(self, x):
         return self.forward(x)
@@ -70,14 +90,21 @@ class NeuralNetwork(object):
         "Производная функции активации"
         return s * (1 - s)
 
-    def save_weights(self, f_w_in_h, f_w_h_out):
-        "Сохранение весов в файл"
-        np.savetxt(f_w_in_h, self.w_in_h, fmt="%s")
-        np.savetxt(f_w_h_out, self.w_h_out, fmt="%s")
+    def save_weights(self, prefix):
+        "Сохранение весов в файлы"
+        for i, w in enumerate(self.w_layers):
+            np.savetxt("{}_{}.txt".format(prefix, i), w, fmt="%s")
     
-    def load_weights(self, f_w_in_h, f_w_h_out):
-        "Загрузка весов из файла"
-        self.w_in_h = np.loadtxt(f_w_in_h, dtype=float)
-        self.w_h_out = np.loadtxt(f_w_h_out, dtype=float)
-        self.w_h_out = self.w_h_out.reshape(self.w_h_out.shape[0], 1)
+    def load_weights(self, prefix):
+        "Загрузка весов из файлов"
+        self.w_layers[0] = np.loadtxt("{}_{}.txt".format(prefix, 0), dtype=float)
+        for i in range(1, len(self.w_layers)-1):
+            self.w_layers[i] = np.loadtxt("{}_{}.txt".format(prefix, i), dtype=float)
+        last = len(self.w_layers)-1
+        shape = self.w_layers[-1].shape
+        self.w_layers[-1] = np.loadtxt("{}_{}.txt".format(prefix, last), dtype=float)
+        self.w_layers[-1] = self.w_layers[-1].reshape(shape[0], 1)
+
+    def __str__(self):
+        return "\nInputs:  {0}\nOutputs: {1}\nHidden:  {2}\nNeurons in Hidden: {3}\nUse Bias: {4}\n".format(self.n_in, self.n_out, self.n_hlayers, self.n_hl, 'Yes' if self.bias else 'No')
         

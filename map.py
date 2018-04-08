@@ -13,7 +13,8 @@ __copyright__   = "(c) MAI, M30-102-17"
 
 import sys              # exit()
 import numpy as np      # матрицы и вектора
-from pylab import plt   # графики
+# графики
+from pylab import plt   
 
 class Map(object):
     """
