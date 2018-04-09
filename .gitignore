@@ -17,5 +17,4 @@ _minted-refman/
 
 # NNet
 map.png
-w_in_h.txt
-w_h_out.txt
+*.w.txt
