@@ -54,7 +54,7 @@ def main(argv):
         print 'Done.'
     else:
         train_d0 = train_d1 = np.array([])
-        if os.path.exists('{}_0.txt'.format(W_PREFIX)):
+        if os.path.exists('{}_0.w.txt'.format(W_PREFIX)):
            print "Loading weights..."
            net.load_weights(W_PREFIX)
            print 'Done.'
