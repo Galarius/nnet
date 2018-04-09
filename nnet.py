@@ -8,38 +8,38 @@ class NeuralNetwork(object):
         self.n_in  = n_in  # кол-во нейронов в входном слое
         self.n_hl  = n_hl  # кол-во нейронов в скрытом слое
         self.n_out = n_out # кол-во нейронов в выходном слое
+        self.use_bias = use_bias
         # количество скрытых слоёв (минимум 1)
         self.n_hlayers = n_hlayers if n_hlayers > 0 else 1 
-        self.w_layers = [] # слои весов (все)
+        self.w_layers = [] # слои весов
+        self.w_biases = [] # веса нейронов смещения в слоях
         # случайное назначение весов (вход -> скрытый слой)
         self.w_layers.append(np.random.randn(self.n_in, self.n_hl))
+        self.w_biases.append(np.random.randn(1, self.n_hl))
         # случайное назначение весов (скрытый слой -> скрытый слой)
         if self.n_hlayers > 1:
             for _ in range(0, self.n_hlayers - 1):
                 self.w_layers.append(np.random.randn(self.n_hl, self.n_hl))
+                self.w_biases.append(np.random.randn(1, self.n_hl))
         # случайное назначение весов (скрытый слой -> выход)
         self.w_layers.append(np.random.randn(self.n_hl, self.n_out))
-        # случайный веса синапсов, исходящих из 
-        # нейронов смещения в скрытых слоях
-        self.biases = []
-        for _ in range(0, self.n_hlayers):
-            self.biases.append( np.random.uniform() if use_bias else 0 )
+        self.w_biases.append(np.random.randn(1, self.n_out))
     
     def forward(self, x):
         "Прямое распространение"
         self.ys = []
         # in -> h
-        s_h = np.dot(x, self.w_layers[0])
+        s_h = np.dot(x, self.w_layers[0]) + self.w_biases[0]
         y_h = self.sigmoid(s_h)
         self.ys.append(y_h)
         # h -> h -> h
         if self.n_hlayers > 1:
             for i in range(0, self.n_hlayers - 1):
-                s_h = np.dot(y_h, self.w_layers[i + 1]) + self.biases[i]
+                s_h = np.dot(y_h, self.w_layers[i + 1]) + self.w_biases[i+1]
                 y_h = self.sigmoid(s_h)
                 self.ys.append(y_h)
         # h -> out
-        s_h = np.dot(y_h, self.w_layers[-1]) + self.biases[-1]
+        s_h = np.dot(y_h, self.w_layers[-1]) + self.w_biases[-1]
         return self.sigmoid(s_h)
 
     def backward(self, x, t, y, alpha, es):
@@ -52,24 +52,40 @@ class NeuralNetwork(object):
         :param es - скорость обучения
         """
         grads = []
+        bias_grads = []
         # ошибка для выходного слоя
         error = t - y
         delta = error * self.sigmoid_prime(y)
         grads.append(self.ys[-1].T.dot(delta))
+        b_error = error
+        b_delta = delta
+        bias_grads.append(b_delta)
         # ошибки для скрытых слоёв
         if self.n_hlayers > 1:
+            for w in self.w_layers:
+                print w
             for i in range(self.n_hlayers - 1, 0, -1):
+                print i
                 error = delta.dot(self.w_layers[i+1].T)
                 delta = error * self.sigmoid_prime(self.ys[i])
                 grads.append(self.ys[i-1].T.dot(delta))
+                b_error = b_delta.dot(self.w_biases[i+1].T)
+                b_delta = b_error * self.sigmoid_prime(self.ys[i])
+                bias_grads.append(b_delta)
         # ошибка для входного слоя
         error = delta.dot(self.w_layers[1].T)
         delta = error * self.sigmoid_prime(self.ys[0])
         grads.append(x.T.dot(delta))
+        b_error = delta.dot(self.w_biases[1].T)
+        b_delta = b_error * self.sigmoid_prime(self.ys[0])
+        bias_grads.append(b_delta)
         # корректировка весов
         s = len(grads)
         for i in range(0, s):
-            self.w_layers[i] = es * grads[s-1-i] + alpha * self.w_layers[i] 
+            self.w_layers[i] = es * grads[s-1-i] + alpha * self.w_layers[i]
+        s = len(bias_grads)
+        for i in range(0, s):
+            self.w_biases[i] = es * bias_grads[s-1-i] + alpha * self.w_biases[i]
 
     def train(self, x, t, alpha, es):
         """
@@ -109,4 +125,4 @@ class NeuralNetwork(object):
         self.w_layers[-1] = self.w_layers[-1].reshape(shape[0], self.n_out)
 
     def __str__(self):
-        return "\nInputs:  {0}\nOutputs: {1}\nHidden:  {2}\nNeurons in Hidden: {3}\nUse Bias: {4}\n".format(self.n_in, self.n_out, self.n_hlayers, self.n_hl, 'Yes' if self.biases[0] else 'No')
+        return "\nInputs:  {0}\nOutputs: {1}\nHidden:  {2}\nNeurons in Hidden: {3}\nUse Bias: {4}\n".format(self.n_in, self.n_out, self.n_hlayers, self.n_hl, 'Yes' if self.use_bias else 'No')
