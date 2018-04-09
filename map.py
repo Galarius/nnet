@@ -35,10 +35,6 @@ class Map(object):
         self.b = np.array([np.random.randint(self.width-4) + 2, self.height], dtype=float)
         # цель
         self.o2 = np.array([self.width, np.random.randint(self.height-2)+1], dtype=float)
-# генерация траектории o-a-c
-        self.t0  = np.array(self._generate(self.o1, self.a, self.o2), dtype=float)
-        # генерация траектории o-b-c
-        self.t1  = np.array(self._generate(self.o1, self.b, self.o2), dtype=float)
 
     def dataset(self, trajectory, npoints, uniform = True):
         # Triangle Point Picking
@@ -59,8 +55,8 @@ class Map(object):
 
     def plotMap(self, fname=None):
         fig, ax = plt.subplots()
-        ax.plot(self.t0[:,0], self.t0[:,1], 'r', label='Trajectory 0')
-        ax.plot(self.t1[:,0], self.t1[:,1], 'b--', label='Trajectory 1')
+        ax.plot([self.o1[0], self.a[0], self.o2[0]], [self.o1[1], self.a[1], self.o2[1]], 'r', label='Trajectory 0')
+        ax.plot([self.o1[0], self.b[0], self.o2[0]], [self.o1[1], self.b[1], self.o2[1]], 'b--', label='Trajectory 1')
         legend = ax.legend(loc='best', framealpha=0.5)
         plt.title("Map")
         plt.grid(True)
@@ -70,8 +66,8 @@ class Map(object):
 
     def plot(self, good, bad, dataset0, dataset1, fname=None):
         fig, ax = plt.subplots()
-        ax.plot(self.t0[:,0], self.t0[:,1], 'r', label='Trajectory 0')
-        ax.plot(self.t1[:,0], self.t1[:,1], 'b--', label='Trajectory 1')
+        ax.plot([self.o1[0], self.a[0], self.o2[0]], [self.o1[1], self.a[1], self.o2[1]], 'r', label='Trajectory 0')
+        ax.plot([self.o1[0], self.b[0], self.o2[0]], [self.o1[1], self.b[1], self.o2[1]], 'b--', label='Trajectory 1')
         if dataset0.any():
             ax.plot(dataset0[:,0], dataset0[:,1], 'ro', label='Train Dataset 0')
         if dataset1.any():
@@ -86,40 +82,6 @@ class Map(object):
         if fname:
             plt.savefig(fname)
         plt.show()
-
-    def _route(self, o1, o2, endpoint = False):
-        """
-        Генерация набора координат, принадлежащих
-        траектории с помощью уравнения прямой:
-            y = k * x + b
-        :param o1 - координаты начала прямого участка траектории
-        :param o2 - координаты конца прямого участка траектории
-        """
-        # вычисление коэффициентов прямой
-        d = o1[0] - o2[0]
-        if not d:
-            print "Invalid input."
-            sys.exit(1)
-        k = (o1[1] - o2[1]) / float(d)
-        b = o2[1] - k * o2[0]
-        # генерация точек
-        s, e = o1.astype(int)[0], o2.astype(int)[0]
-        t = [[x, k * x + b] for x in range(s, e)]
-        if endpoint:    
-            # добавление в список последней точки
-            t.append(o2)
-        return t
-
-    def _generate(self, s, t, d):
-        """
-        Генерация траектории по трём точкам
-        :param s стартовая точка
-        :param t промежуточная точка
-        :param d цель
-        """
-        # генерация траектории s-t-d, состоящей из двух прямых
-        t  = self._route(s, t) + self._route(t, d, True)
-        return t
 
     @staticmethod
     def triangleArea(p0, p1, p2):
