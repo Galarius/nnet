@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-__author__ = "Ilya Shoshin"
-__copyright__   = "(c) MAI, M30-102-17"
+__author__ = "Ilya Shoshin (Galarius)"
 
 """
 Генерация условной карты местности, 

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
+__author__ = "Ilya Shoshin (Galarius)"
+
 import numpy as np
 
 class NeuralNetwork(object):
