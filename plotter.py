@@ -80,8 +80,8 @@ def plotSigmoidBias(fname=None):
         plt.savefig(fname)
     plt.show()
 
-# plotSigmoidPrime('plt_sig_e_prime.png')
-# plotSigmoidExp('plt_sig_e.png')
-# plotSigmoidTanh('plt_sig_tanh.png')
+plotSigmoidPrime('plt_sig_e_prime.png')
+plotSigmoidExp('plt_sig_e.png')
+plotSigmoidTanh('plt_sig_tanh.png')
 plotSigmoid('plt_sig_w1.png')
 plotSigmoidBias('plt_sig_w1w2.png')

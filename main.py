@@ -24,17 +24,16 @@ def main(argv):
     net = NeuralNetwork(2, args.layer_neurons, 1, args.hidden_layers, args.bias)
     print net
     if  args.train:
-        # get datasets for map
+        # тренировочные данные
         train_d0, train_d1 = map.dataset(0, MAP_WIDTH + MAP_HEIGHT), \
                              map.dataset(1, MAP_WIDTH + MAP_HEIGHT)
-        # input
-        x = np.concatenate((train_d0, train_d1), axis=0)
-        x_normalized = x / np.amax(x, axis=0)
-        # targets
         td0 = np.array([[0]] * train_d0.shape[0], dtype=float)
         td1 = np.array([[1]] * train_d1.shape[0], dtype=float)
-        t = np.concatenate((td0, td1), axis=0)
-        # t already normalized        
+        t = np.concatenate((td0, td1), axis=0) # уже нормализован
+        # вход
+        x = np.concatenate((train_d0, train_d1), axis=0)
+        x_normalized = x / np.amax(x, axis=0)
+        
         print 'Training...'
         if args.logging:
             with open('training.log', 'w') as f:
@@ -60,22 +59,19 @@ def main(argv):
         else:
             print "No weights were found!"
 
-    # input for prediction
     if args.seed:
         np.random.seed(args.seed + 1)
     
-    # get test dataset for map
-    zds0, zds1 = np.random.randint(2, 20), np.random.randint(2, 20)
-    d0, d1 = map.dataset(0, zds0), map.dataset(1, zds1)
-    # input
-    x = np.concatenate((d0, d1), axis=0)
-    x_normalized = x / np.amax(x, axis=0)
-    # targets
+    # ожидаемые данные для проверки
     td0 = np.array([[0]] * d0.shape[0], dtype=float)
     td1 = np.array([[1]] * d1.shape[0], dtype=float)
-    t = np.concatenate((td0, td1), axis=0)
-    # t already normalized        
-
+    t = np.concatenate((td0, td1), axis=0) # уже нормализован
+    # вход
+    zds0, zds1 = np.random.randint(2, 20), np.random.randint(2, 20)
+    d0, d1 = map.dataset(0, zds0), map.dataset(1, zds1)
+    x = np.concatenate((d0, d1), axis=0)
+    x_normalized = x / np.amax(x, axis=0)
+    # выход
     y = np.round(net.predict(x_normalized))
     if args.verbose:
         print "Input:"
@@ -92,7 +88,7 @@ def main(argv):
         print "{}% are good!".format(res.sum() * 100 / len(res))
 
     if args.plotting:
-        # filter good from bad hits
+        # фильтрация 'попаданий' и 'промахов'
         good = []
         bad = []
         for i, v in enumerate(res):
@@ -101,7 +97,6 @@ def main(argv):
             else:
                 bad.append(x[i])
         map.plot(np.array(good), np.array(bad), train_d0, train_d1, args.plot_name)
-        # map.plotMap('plt_map.png')
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
