@@ -62,15 +62,15 @@ def main(argv):
     if args.seed:
         np.random.seed(args.seed + 1)
     
-    # ожидаемые данные для проверки
-    td0 = np.array([[0]] * d0.shape[0], dtype=float)
-    td1 = np.array([[1]] * d1.shape[0], dtype=float)
-    t = np.concatenate((td0, td1), axis=0) # уже нормализован
     # вход
     zds0, zds1 = np.random.randint(2, 20), np.random.randint(2, 20)
     d0, d1 = map.dataset(0, zds0), map.dataset(1, zds1)
     x = np.concatenate((d0, d1), axis=0)
     x_normalized = x / np.amax(x, axis=0)
+    # ожидаемые данные для проверки
+    td0 = np.array([[0]] * d0.shape[0], dtype=float)
+    td1 = np.array([[1]] * d1.shape[0], dtype=float)
+    t = np.concatenate((td0, td1), axis=0) # уже нормализован
     # выход
     y = np.round(net.predict(x_normalized))
     if args.verbose:
