@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 __author__ = "Ilya Shoshin (Galarius)"
 
@@ -22,7 +22,7 @@ def main(argv):
 
     map = Map(MAP_WIDTH, MAP_HEIGHT)
     net = NeuralNetwork(2, args.layer_neurons, 1, args.hidden_layers, args.bias)
-    print net
+    print(net)
     if  args.train:
         # Training data
         train_d0, train_d1 = map.dataset(0, MAP_WIDTH + MAP_HEIGHT), \
@@ -34,30 +34,30 @@ def main(argv):
         x = np.concatenate((train_d0, train_d1), axis=0)
         x_normalized = x / np.amax(x, axis=0)
         
-        print 'Training...'
+        print('Training...')
         if args.logging:
             with open('training.log', 'w') as f:
-                for epoch in xrange(args.epochs):
-                    f.write('Epoch {}\n'.format(epoch))
-                    f.write("Input:\n{}\n".format(x_normalized.T))
-                    f.write("Actual Output:\n{}\n".format(t.T))
-                    f.write("Predicted Output:\n{}\n".format(np.round(net.forward(x_normalized).T)))
-                    f.write("Loss:\n{}\n\n".format(str(np.mean(np.square(t - net.forward(x_normalized))))))
+                for epoch in range(args.epochs):
+                    f.write(f'Epoch {epoch}\n')
+                    f.write(f"Input:\n{x_normalized.T}\n")
+                    f.write(f"Actual Output:\n{t.T}\n")
+                    f.write(f"Predicted Output:\n{np.round(net.forward(x_normalized).T)}\n")
+                    f.write(f"Loss:\n{str(np.mean(np.square(t - net.forward(x_normalized))))}\n\n")
                     net.train(x_normalized, t)
         else:
-            for epoch in xrange(args.epochs):
+            for epoch in range(args.epochs):
                 net.train(x_normalized, t, args.alpha, args.train_speed)
-        print "Saving weights..."
+        print("Saving weights...")
         net.save_weights(W_PREFIX)
-        print 'Done.'
+        print('Done.')
     else:
         train_d0 = train_d1 = np.array([])
         if os.path.exists('{}_0.w.txt'.format(W_PREFIX)):
-           print "Loading weights..."
+           print("Loading weights...")
            net.load_weights(W_PREFIX)
-           print 'Done.'
+           print('Done.')
         else:
-            print "No weights were found!"
+            print("No weights were found!")
 
     if args.seed:
         np.random.seed(args.seed + 1)
@@ -74,18 +74,18 @@ def main(argv):
     # Output
     y = np.round(net.predict(x_normalized))
     if args.verbose:
-        print "Input:"
-        print x
-        print "Output (Expected):"
-        print t
-        print "Output (Actual):"
-        print y
+        print("Input:")
+        print(x)
+        print("Output (Expected):")
+        print(t)
+        print("Output (Actual):")
+        print(y)
 
     res = (y == t)
     if res.all():
-        print "\nAll Good!"
+        print("\nAll Good!")
     else:
-        print "{}% are good!".format(res.sum() * 100 / len(res))
+        print(f"{res.sum() * 100 / len(res)}% are good!")
 
     if args.plotting:
         # Filtering hits and misses

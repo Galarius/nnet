@@ -48,10 +48,9 @@ class Map(object):
         return np.array(data)
 
     def plotMap(self, fname=None):
-        fig, ax = plt.subplots()
+        _, ax = plt.subplots()
         ax.plot([self.o1[0], self.a[0], self.o2[0]], [self.o1[1], self.a[1], self.o2[1]], 'r', label='Trajectory 0')
         ax.plot([self.o1[0], self.b[0], self.o2[0]], [self.o1[1], self.b[1], self.o2[1]], 'b--', label='Trajectory 1')
-        legend = ax.legend(loc='best', framealpha=0.5)
         plt.title("Map")
         plt.grid(True)
         if fname:
@@ -59,7 +58,7 @@ class Map(object):
         plt.show()
 
     def plot(self, good, bad, dataset0, dataset1, fname=None):
-        fig, ax = plt.subplots()
+        _, ax = plt.subplots()
         ax.plot([self.o1[0], self.a[0], self.o2[0]], [self.o1[1], self.a[1], self.o2[1]], 'r', label='Trajectory 0')
         ax.plot([self.o1[0], self.b[0], self.o2[0]], [self.o1[1], self.b[1], self.o2[1]], 'b--', label='Trajectory 1')
         if dataset0.any():
@@ -70,7 +69,6 @@ class Map(object):
             ax.plot(good[:,0], good[:,1], 'go', markersize=10, label='Correct prediction')
         if bad.any():
             ax.plot(bad[:,0], bad[:,1], 'black', linestyle='none', marker='D', markersize=10, label='Incorrect prediction')
-        legend = ax.legend(loc='best', framealpha=0.5)
         plt.title("Map")
         plt.grid(True)
         if fname:
@@ -111,7 +109,7 @@ class Map(object):
         area = Map.triangleArea(p0, p1, p2)
         if uniform:
             npoints *= 2
-        for i in xrange(npoints):
+        for _ in range(npoints):
             a1 = np.random.random()
             a2 = np.random.random()
             if uniform:
