@@ -24,13 +24,13 @@ def main(argv):
     net = NeuralNetwork(2, args.layer_neurons, 1, args.hidden_layers, args.bias)
     print net
     if  args.train:
-        # тренировочные данные
+        # Training data
         train_d0, train_d1 = map.dataset(0, MAP_WIDTH + MAP_HEIGHT), \
                              map.dataset(1, MAP_WIDTH + MAP_HEIGHT)
         td0 = np.array([[0]] * train_d0.shape[0], dtype=float)
         td1 = np.array([[1]] * train_d1.shape[0], dtype=float)
-        t = np.concatenate((td0, td1), axis=0) # уже нормализован
-        # вход
+        t = np.concatenate((td0, td1), axis=0) # Already normalized
+        # Input
         x = np.concatenate((train_d0, train_d1), axis=0)
         x_normalized = x / np.amax(x, axis=0)
         
@@ -62,16 +62,16 @@ def main(argv):
     if args.seed:
         np.random.seed(args.seed + 1)
     
-    # вход
+    # Input
     zds0, zds1 = np.random.randint(2, 20), np.random.randint(2, 20)
     d0, d1 = map.dataset(0, zds0), map.dataset(1, zds1)
     x = np.concatenate((d0, d1), axis=0)
     x_normalized = x / np.amax(x, axis=0)
-    # ожидаемые данные для проверки
+    # Expected data to be tested
     td0 = np.array([[0]] * d0.shape[0], dtype=float)
     td1 = np.array([[1]] * d1.shape[0], dtype=float)
-    t = np.concatenate((td0, td1), axis=0) # уже нормализован
-    # выход
+    t = np.concatenate((td0, td1), axis=0) # Already normalized
+    # Output
     y = np.round(net.predict(x_normalized))
     if args.verbose:
         print "Input:"
@@ -88,7 +88,7 @@ def main(argv):
         print "{}% are good!".format(res.sum() * 100 / len(res))
 
     if args.plotting:
-        # фильтрация 'попаданий' и 'промахов'
+        # Filtering hits and misses
         good = []
         bad = []
         for i, v in enumerate(res):

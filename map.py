@@ -1,38 +1,33 @@
 # -*- coding: utf-8 -*-
-#!/usr/bin/env python
 
 __author__ = "Ilya Shoshin (Galarius)"
 
 """
-Генерация условной карты местности, 
-двух маршрутов и равномерно распределённых
-точек, относящихся к одному из двух маршрутов.
-Визуализация условной карты местности.
+Generation of a conditional map of the terrain, 
+two routes and evenly spaced points belonging to one of the two routes.
+Visualization of the conditional map of the terrain.
 """
-
-import sys              # exit()
-import numpy as np      # матрицы и вектора
-# графики
+      
+import numpy as np
 from pylab import plt   
 
 class Map(object):
     """
-    Условная карта местности с двумя маршрутами.
-    Позволяет сгенерировать равномерно распределённые
-    точки, относящиеся к одному из двух маршрутов.
-    Предоставляет визуализацию условной карты местности.
+    Conditional terrain map with two routes.
+    Allows to generate evenly distributed points belonging to one of the two routes.
+    Provides a visualization of the conditional terrain map.
     """
     def __init__(self, width, height):
-        # размер карты
+        # Map size
         self.width = width
         self.height = height
-        # старт
+        # Start
         self.o1 = np.array([0, np.random.randint(self.height-2) + 1], dtype=float)
-        # промежуточная точка маршрута 1
+        # Intermediate point 1 of route
         self.a = np.array([np.random.randint(self.width-4) + 2, 0], dtype=float)
-        # промежуточная точка маршрута 2
+        # Intermediate point 2 of route
         self.b = np.array([np.random.randint(self.width-4) + 2, self.height], dtype=float)
-        # цель
+        # Destination
         self.o2 = np.array([self.width, np.random.randint(self.height-2)+1], dtype=float)
 
     def dataset(self, trajectory, npoints, uniform = True):
@@ -85,18 +80,17 @@ class Map(object):
     @staticmethod
     def triangleArea(p0, p1, p2):
         """
-        Вычисление площади треугольника
-        :param p0,p1,p2 - координаты треугольника
+        Calculates the area of a triangle.
+        :param p0,p1,p2 - triangle coordinates
         """
         return 0.5 * (-p1[1] * p2[0] + p0[1] * (-p1[0] + p2[0]) + p0[0] * (p1[1] - p2[1]) + p1[0] * p2[1])
 
     @staticmethod
     def insideTriangle(p, p0, p1, p2, area):
         """
-        Проверка нахождения точки внутри треугольника 
-        при помощи барицентрических координат.
-        :param p - координаты точки для проверки
-        :param p0,p1,p2 - координаты треугольника
+        Checks for a point inside a triangle using barycentric coordinates.
+        :param p - coordinates of the point to check
+        :param p0,p1,p2 - triangle coordinates
         """
         s = 1.0 / (2.0 * area) * (p0[1] * p2[0] - p0[0] * p2[1] + (p2[1] - p0[1]) * p[0] + (p0[0] - p2[0]) * p[1])
         t = 1.0 / (2.0 * area) * (p0[0] * p1[1] - p0[1] * p1[0] + (p0[1] - p1[1]) * p[0] + (p1[0] - p0[0]) * p[1])
@@ -105,11 +99,10 @@ class Map(object):
     @staticmethod
     def distrInTriangle(p0, p1, p2, npoints, uniform = True):
         """
-        Генерация точек внутри треугольника 
-        методом Triangle Point Picking
-        :param p0,p1,p2 - координаты треугольника
-        :param npoints - количество точек
-        :uniform - равномерное распределение
+        Generates points inside a triangle by the Triangle Point Picking method.
+        :param p0,p1,p2 - triangle coordinates
+        :param npoints - number of points
+        :uniform - even distribution
         """
         data = []
         v0 = p0
