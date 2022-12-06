@@ -94,7 +94,7 @@ To save plot add: `--plot-name plot.png`.
 
 ## Requirements
 
-* `Python 2.7`
+* `Python 3`
 * `NumPy`
 * `MatplotLib`
 
